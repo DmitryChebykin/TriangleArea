@@ -58,7 +58,6 @@ public class TriangleArea {
     }
 
     private static double[] getTriangleSizesLength(double[][] trianglePoints) {
-        double[] triangleSizeLength = new double[3];
 
         double x1 = trianglePoints[0][0];
         double y1 = trianglePoints[0][1];
@@ -68,6 +67,8 @@ public class TriangleArea {
 
         double x3 = trianglePoints[2][0];
         double y3 = trianglePoints[2][1];
+
+        double[] triangleSizeLength = new double[3];
 
         triangleSizeLength[0] = Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
         triangleSizeLength[1] = Math.sqrt(Math.pow((x3 - x2), 2) + Math.pow((y3 - y2), 2));
