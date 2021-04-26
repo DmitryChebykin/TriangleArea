@@ -1,6 +1,8 @@
 import java.util.Scanner;
 
 public class TriangleArea {
+    public static final double EPSILON = 0.00001;
+
     public static void main(String[] args) {
         double[][] trianglePoints = getTrianglePoints();
         printTriangleInfo(trianglePoints);
@@ -9,20 +11,18 @@ public class TriangleArea {
     private static double[] getPointCoordinates() {
         Scanner scanner = new Scanner(System.in);
 
-        String inputString = scanner.nextLine().replaceAll("\\s+", " ").trim();
-        String[] parsedString = inputString.split("\\s");
-
         double[] coordinates = new double[2];
         boolean isRightInput = false;
 
         while (!isRightInput) {
+            String inputString = scanner.nextLine().replaceAll("\\s+", " ").trim();
+            String[] parsedString = inputString.split("\\s");
             try {
                 coordinates[0] = Double.parseDouble(parsedString[0]);
                 coordinates[1] = Double.parseDouble(parsedString[1]);
                 isRightInput = true;
             } catch (Exception e) {
                 System.out.println("Неверный ввод, попробуйте снова!");
-                scanner.nextLine();
             }
         }
 
@@ -34,31 +34,24 @@ public class TriangleArea {
         System.out.println("в виде двух чисел, разделенных пробелами,");
         System.out.println("например: 5.2  3.6");
 
-        boolean isRightInput = false;
         double[][] triangleCoordinates = new double[3][2];
 
-        while (!isRightInput) {
-
-            for (int i = 1; i <= 3; i++) {
-                System.out.println("Введите координаты вершины номер " + i);
-                triangleCoordinates[i - 1] = getPointCoordinates();
-            }
-
-            isRightInput = true;
+        for (int i = 1; i <= 3; i++) {
+            System.out.println("Введите координаты вершины номер " + i);
+            triangleCoordinates[i - 1] = getPointCoordinates();
         }
 
         return triangleCoordinates;
     }
 
-    private static double triangleArea(double[][] trianglePoints) {
-        double[] triangleSizeLength = getTriangleSizesLength(trianglePoints);
+    private static double getTriangleArea(double[][] trianglePoints) {
+        double[] triangleSidesLengths = getTriangleSidesLengths(trianglePoints);
 
-        double semiPerimeter = (triangleSizeLength[0] + triangleSizeLength[1] + triangleSizeLength[2]) / 2;
-        return Math.sqrt(semiPerimeter * (semiPerimeter - triangleSizeLength[0]) * (semiPerimeter - triangleSizeLength[1]) * (semiPerimeter - triangleSizeLength[2]));
+        double semiPerimeter = (triangleSidesLengths[0] + triangleSidesLengths[1] + triangleSidesLengths[2]) / 2;
+        return Math.sqrt(semiPerimeter * (semiPerimeter - triangleSidesLengths[0]) * (semiPerimeter - triangleSidesLengths[1]) * (semiPerimeter - triangleSidesLengths[2]));
     }
 
-    private static double[] getTriangleSizesLength(double[][] trianglePoints) {
-
+    private static double[] getTriangleSidesLengths(double[][] trianglePoints) {
         double x1 = trianglePoints[0][0];
         double y1 = trianglePoints[0][1];
 
@@ -68,13 +61,13 @@ public class TriangleArea {
         double x3 = trianglePoints[2][0];
         double y3 = trianglePoints[2][1];
 
-        double[] triangleSizeLength = new double[3];
+        double[] triangleSidesLengths = new double[3];
 
-        triangleSizeLength[0] = Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
-        triangleSizeLength[1] = Math.sqrt(Math.pow((x3 - x2), 2) + Math.pow((y3 - y2), 2));
-        triangleSizeLength[2] = Math.sqrt(Math.pow((x3 - x1), 2) + Math.pow((y3 - y1), 2));
+        triangleSidesLengths[0] = getLineLength(x1, y1, x2, y2);
+        triangleSidesLengths[1] = getLineLength(x2, y2, x3, y3);
+        triangleSidesLengths[2] = getLineLength(x1, y1, x3, y3);
 
-        return triangleSizeLength;
+        return triangleSidesLengths;
     }
 
     private static boolean isStraightLineCoordinates(double[][] trianglePoints) {
@@ -87,24 +80,31 @@ public class TriangleArea {
         double x3 = trianglePoints[2][0];
         double y3 = trianglePoints[2][1];
 
-        if ((x1 == x2 && x2 == x3) || (y1 == y2 && y2 == y3)) {
-            return true;
+        double leftExpression = getDifferenceTwoPrimitiveDoubles(y3, y1) * getDifferenceTwoPrimitiveDoubles(x2, x1);
+        double rightExpression = getDifferenceTwoPrimitiveDoubles(x3, x1) * getDifferenceTwoPrimitiveDoubles(y2, y1);
 
-        } else if (x2 != x1 && y2 != y1) {
-            return (y3 - y1) / (y2 - y1) == (x3 - x1) / (x2 - x1);
-
-        } else {
-            return (y2 - y1) / (y3 - y1) == (x2 - x1) / (x3 - x1);
-        }
+        return  isPrimitiveDoublesEqual(leftExpression, rightExpression);
     }
+
 
     private static void printTriangleInfo(double[][] trianglePoints) {
         if (isStraightLineCoordinates(trianglePoints)) {
             System.out.println("Данные точки расположены на одной линии.");
-
         } else {
-            double triangleArea = triangleArea(trianglePoints);
+            double triangleArea = getTriangleArea(trianglePoints);
             System.out.printf("Площадь треугольника равна %f", triangleArea);
         }
+    }
+
+    private static double getLineLength (double x1, double y1, double x2, double y2){
+        return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+    }
+
+    private static boolean isPrimitiveDoublesEqual (double leftNumber, double rightNumber){
+        return Math.abs(leftNumber - rightNumber) <= EPSILON;
+    }
+
+    private static double getDifferenceTwoPrimitiveDoubles(double leftNumber, double rightNumber){
+        return isPrimitiveDoublesEqual(leftNumber, rightNumber)  ? 0: leftNumber - rightNumber;
     }
 }
